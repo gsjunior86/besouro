@@ -45,6 +45,13 @@ player1_pos_x = 0
 player1_pos_y = 0
 player2_pos_x = 0
 player2_pos_y = 0
+player1_attack = 0
+player1_attack_down = 0
+player1_jump = 0
+player2_attack = 0
+player2_attack_down = 0
+player2_jump = 0
+proj_attack = 0
 
 local profile = {
 {	games = {"sfa"},
@@ -1191,20 +1198,40 @@ end
 
 --------------------------------------------------------------------------------
 -- draw the hitboxes
-
-local draw_hitbox = function(hb)
+local draw_hitbox = function(n_player,hb)
 	if not hb or any_true({
 		not globals.draw_pushboxes and hb.type == "push",
 		not globals.draw_throwable_boxes and hb.type == "throwable",
 	}) then return
 	end
-
+	
 	if globals.draw_mini_axis then
 		gui.drawline(hb.val_x, hb.val_y-globals.mini_axis_size, hb.val_x, hb.val_y+globals.mini_axis_size, boxes[hb.type].outline)
 		gui.drawline(hb.val_x-globals.mini_axis_size, hb.val_y, hb.val_x+globals.mini_axis_size, hb.val_y, boxes[hb.type].outline)
 	end
 	
-
+	if(hb.type == "attack") then
+		if(n_player == 1) then
+			if(hb.val_y > 150) then
+				player1_attack_down = 1
+			else
+				player1_attack = 1
+			end
+		end
+		if(n_player == 2) then
+			if(hb.val_y > 150) then
+				player2_attack_down = 1
+			else
+				player2_attack = 1
+			end
+		end
+	end
+	if(hb.type == "proj. attack") then
+		proj_attack = 1
+	end
+	
+	
+	
 	--gui.box(hb.left, hb.top, hb.right, hb.bottom, boxes[hb.type].fill, boxes[hb.type].outline)
 end
 
@@ -1215,10 +1242,14 @@ local draw_axis = function(num_player,obj)
 	--gui.text(obj.pos_x, obj.pos_y, string.format("%06X", obj.base)) --debug
 	if(num_player == 1) then
 		player1_pos_x = obj.pos_x
-		player1_pos_y = obj.pos_y
+		if(obj.pos_y < 200) then
+			player1_jump = 1
+		end
 	elseif(num_player == 2) then
 		player2_pos_x = obj.pos_x
-		player2_pos_y = obj.pos_y
+		if(obj.pos_y < 200) then
+			player2_jump = 1
+		end
 	end
 end
 
@@ -1233,10 +1264,10 @@ render_hitboxes = function()
 	if globals.blank_screen then
 		gui.box(0, 0, emu.screenwidth(), emu.screenheight(), globals.blank_color)
 	end
-
+	
 	for entry = 1, f.max_boxes or 0 do
 		for _, obj in ipairs(f) do
-			draw_hitbox(obj[entry])
+			draw_hitbox(_,obj[entry])
 		end
 	end
 	
@@ -1249,7 +1280,7 @@ end
 
 
 --gui.register(function()
---	render_hitboxes()
+	--render_hitboxes()
 --end)
 
 

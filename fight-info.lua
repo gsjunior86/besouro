@@ -1283,9 +1283,9 @@ end
 end
 
 
-emu.registerafter(function()
-	update_OSD()
-end)
+--emu.registerafter(function()
+--	update_OSD()
+--end)
 
 --------------------------------------------------------------------------------
 -- drawing functions
@@ -1365,10 +1365,10 @@ local draw_OSD = function()
 end
 
 
-gui.register(function()
-	gui.clearuncommitted()
-	draw_OSD()
-end)
+--gui.register(function()
+--	gui.clearuncommitted()
+--	draw_OSD()
+--end)
 
 --------------------------------------------------------------------------------
 -- initialize on game startup
