@@ -25,11 +25,11 @@ luac.out
 *.def
 *.exp
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+# Eclipse files
+.project
+.settings/
+target/
+.classpath
 
 # Executables
 *.exe
