@@ -26,6 +26,12 @@
             <artifactId>deeplearning4j-core</artifactId>
             <version>${dl4j-master.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-cuda-10.2-platform</artifactId>
+            <version>${dl4j-master.version}</version>
+        </dependency>
 
 	</dependencies>
 	
@@ -38,7 +44,7 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<executions>
+				<executions><!-- 
 					<execution>
 						<id>scala-compile-first</id>
 						<phase>process-resources</phase>
@@ -47,13 +53,13 @@
 							<goal>compile</goal>
 						</goals>
 					</execution>
-					<execution>
+					<execution> 
 						<id>scala-test-compile</id>
 						<phase>process-test-resources</phase>
 						<goals>
 							<goal>testCompile</goal>
 						</goals>
-					</execution>
+					</execution>-->
 				</executions>
 			</plugin>
 			<!-- This plugin compiles Java files -->

@@ -32,12 +32,10 @@ ai_moves = {
     "P1 Right",
 	"P1 Up",
 	"P1 Down",
-	"P1 Up,P1 Right",
-	"P1 Up,P1 Left",
-	"P1 Down,P1 Left",
-	"P1 Down,P1 Button 6",
+	"P1 Button 1",
 	"P1 Button 2",
 	"P1 Button 3",
+	"P1 Button 4",
 	"P1 Button 5",
 	"P1 Button 6"
   },
@@ -46,12 +44,10 @@ ai_moves = {
     "P1 Left",
 	"P1 Up",
 	"P1 Down",
-	"P1 Up,P1 Left",
-	"P1 Up,P1 Right",
-	"P1 Down,P1 Right",
-	"P1 Down,P1 Button 6",
+	"P1 Button 1",
 	"P1 Button 2",
 	"P1 Button 3",
+	"P1 Button 4",
 	"P1 Button 5",
 	"P1 Button 6"
   }
@@ -89,6 +85,8 @@ function send_data(set)
 	else
 		client:send(format_training_set(set) .. "\n")
 	end
+	
+	
 end
 
 function reset_values()
@@ -287,7 +285,8 @@ function execute_move()
 end
 
 function format_training_set(set)
-	set_str = set.dist_close .. "," ..set.dist_medium .. "," .. set.dist_far .. "," .. set.foe_attack .. "," .. set.foe_attack_down .. "," .. set.foe_jump .. "," .. set.foe_projectile
+	label = get_pressed_keys(joypad.getdown())	
+	set_str = set.dist_close .. "," ..set.dist_medium .. "," .. set.dist_far .. "," .. set.foe_attack .. "," .. set.foe_attack_down .. "," .. set.foe_jump .. "," .. set.foe_projectile .. "|".. label
 	return set_str
 end
 
@@ -317,7 +316,7 @@ function predict_move()
 	
 	--print(training_set)
 	
-	send_data(training_set)
+	--send_data(training_set)
 	
 end
 
@@ -388,6 +387,52 @@ gui.register(function()
 	end
 end)
 
+local function array_has_value(src_arr, str)
+	for i=1,#src_arr do
+		if(src_arr[i] == str) then
+			return true
+		end
+	end
+		
+	return false
+	
+end
+
+function get_pressed_keys(pressed_buttons)
+
+		
+		keys = {}
+		
+		j = 1
+		for key, value in pairs(pressed_buttons) do
+			keys[j] = key
+			j = j + 1
+		end
+		
+		moves = ai_moves.l
+		if( player1.lado == 'r') then
+			moves = ai_moves.r
+		end
+		
+		label = {}
+		for x=1, #moves do		
+			if(array_has_value(keys,moves[x])) then
+				label[x] = 1
+			else
+				label[x] = 0
+			end
+		end
+	
+		str_label = ""
+		
+		for x=1,#label do
+			str_label = str_label ..label[x] .. "," 
+		end
+	
+		return string.sub(str_label,0,#str_label-1)
+
+end
+
 emu.registerstart(function()
 	whatgame()
 end)
@@ -399,9 +444,15 @@ emu.registerbefore(function()
 end)
 
 emu.registerafter(function()
+	send_data(training_set)
 	reset_attack_proj()	
 	update_OSD()
     update_hitboxes()
+	
+	
+	
+	
+		
 	--clearJoypad()	
 end)
 
