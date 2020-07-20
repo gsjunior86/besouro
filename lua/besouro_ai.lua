@@ -286,7 +286,7 @@ end
 
 function format_training_set(set)
 	label = get_pressed_keys(joypad.getdown())	
-	set_str = set.dist_close .. "," ..set.dist_medium .. "," .. set.dist_far .. "," .. set.foe_attack .. "," .. set.foe_attack_down .. "," .. set.foe_jump .. "," .. set.foe_projectile .. "|".. label
+	set_str = set.dist_close .. "," ..set.dist_medium .. "," .. set.dist_far .. "," .. set.player_jump .. ",".. set.foe_attack .. "," .. set.foe_attack_down .. "," .. set.foe_jump .. "," .. set.foe_projectile .. "|".. label
 	return set_str
 end
 
@@ -294,6 +294,7 @@ function predict_move()
 	training_set.dist_close = 0
 	training_set.dist_medium = 0
 	training_set.dist_far = 0
+	training_set.player_jump = player1.jump
 	training_set.foe_attack = player2.attack
 	training_set.foe_attack_down = player2.attack_down
 	training_set.foe_jump = player2.jump

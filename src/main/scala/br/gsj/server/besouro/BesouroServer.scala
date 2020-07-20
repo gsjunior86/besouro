@@ -11,7 +11,7 @@ import java.io.FileWriter
 class BesouroServer(port: Int) {
   
   val fileData = new File("src/main/resources/training.data")
-  val fw = new FileWriter(fileData)
+  val fw = new FileWriter(fileData,true)
   
   val serverSocket = new ServerSocket(port);
   println("Besouro Server Started ...")
