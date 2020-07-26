@@ -27,7 +27,8 @@ class BesouroServer(port: Int) {
     var line = "";
         while (line  != null){
           line = in.readLine()
-          var z = false
+          println(line)
+          /*var z = false
           var cont = 0
           val arr = line.split("\\|")(1).split(",")
           for (x <- arr){
@@ -40,10 +41,10 @@ class BesouroServer(port: Int) {
          
           //println(cont)
           if(!z){
-            fw.write(line.trim() + "\n")
-            fw.flush()
+            //fw.write(line.trim() + "\n")
+            //fw.flush()
             println("echo: " + line.trim())
-          }
+          }*/
     }
   }
   

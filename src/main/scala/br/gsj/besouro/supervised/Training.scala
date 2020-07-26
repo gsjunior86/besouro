@@ -32,9 +32,9 @@ import org.deeplearning4j.optimize.listeners.ScoreIterationListener
 object Training {
   
   def main(args: Array[String]): Unit = {
-    val nEpochs = 10000
+    val nEpochs = 30
     val seed = 1234
-    val learningRate = 0.001
+    val learningRate = 0.0001
     
     
    
@@ -51,35 +51,35 @@ object Training {
     
     val configuration = new NeuralNetConfiguration.Builder()
     .seed(seed)
-    .weightInit(WeightInit.RELU)
-    .activation(Activation.LEAKYRELU)
+    .weightInit(WeightInit.XAVIER)
+    .activation(Activation.SIGMOID)
     .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
     //.updater(new Nesterovs(learningRate))
     .updater(new Adam(learningRate))
-    .l2(0.0001)
+    .l2(0.001)
+    
     //.dropOut(0.01)
     .list()
     .layer(0, new DenseLayer.Builder()
-            .nIn(8).nOut(30)
-            .weightInit(WeightInit.RELU)
-            .activation(Activation.RELU) 
+            .nIn(8).nOut(1440)
+            .activation(Activation.SIGMOID) 
             .build())
      .layer(1, new DenseLayer.Builder()
-            .nIn(30).nOut(20)
-            .weightInit(WeightInit.XAVIER)
-            .activation(Activation.RELU) 
+            .nIn(1440).nOut(1440)
+             .hasBias(true)
+            .activation(Activation.SIGMOID) 
             .build())
        .layer(2, new DenseLayer.Builder()
-            .nIn(20).nOut(20)
-            .weightInit(WeightInit.XAVIER)
+            .nIn(1440).nOut(1440)
+            .hasBias(true)
             .activation(Activation.SIGMOID)
             .build())
        .layer(3, new OutputLayer.Builder()
-            .nIn(20).nOut(10)
-            .weightInit(WeightInit.XAVIER)
-            .activation(Activation.SOFTMAX)
-            .lossFunction(LossFunctions.LossFunction.MCXENT)
-            //.lossFunction(new LossMultiLabel)
+            .nIn(1440).nOut(10)
+            .hasBias(true)
+            .activation(Activation.SIGMOID)
+           // .lossFunction(LossFunctions.LossFunction.MCXENT)
+            .lossFunction(new LossMultiLabel)
             .build())
     //.layer(new Input)
     .build()
@@ -97,7 +97,7 @@ object Training {
         }
          // create output for every training sample
         val output = net.output(ds.getFeatures());
-        //net.save(new File("src/main/resources/model.data"))
+        net.save(new File("src/main/resources/model.data"))
        
         println(output)
       

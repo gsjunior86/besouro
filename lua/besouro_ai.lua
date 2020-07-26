@@ -193,22 +193,10 @@ function compute_players_info()
 		if(player1.life == "144" and player2.life == "144" ) then
 			computed = false
 		end
-			
 		players_distance = tonumber(player1.pos_x) - tonumber(player2.pos_x)
-			
+	
 		if(players_distance < 0) then
 			players_distance = players_distance * -1
-		end
-		players_distance = players_distance - 40
-		dif = emu.screenwidth() - players_distance
-		perc = (dif * 100) / emu.screenwidth()
-			
-		if(perc > 60) then
-			players_distance = "close"
-		elseif (perc < 60 and perc > 40) then
-			players_distance = "medium"
-		else
-			players_distance = "far"
 		end
 			
 		if(tonumber(player1.pos_x) < tonumber(player2.pos_x)) then
@@ -286,27 +274,19 @@ end
 
 function format_training_set(set)
 	label = get_pressed_keys(joypad.getdown())	
-	set_str = set.dist_close .. "," ..set.dist_medium .. "," .. set.dist_far .. "," .. set.player_jump .. ",".. set.foe_attack .. "," .. set.foe_attack_down .. "," .. set.foe_jump .. "," .. set.foe_projectile .. "|".. label
+	set_str = tonumber(set.dist) .. "," .. player1.life .. "," .. player1.special .. ",".. player2.life .. "," .. player2.special .. "," .. set.player_jump .. ",".. set.foe_attack .. "," .. set.foe_attack_down .. "," .. set.foe_jump .. "," .. set.foe_projectile 
+	--.. "|".. label
 	return set_str
 end
 
 function predict_move()
-	training_set.dist_close = 0
-	training_set.dist_medium = 0
-	training_set.dist_far = 0
+	training_set.dist = players_distance
 	training_set.player_jump = player1.jump
 	training_set.foe_attack = player2.attack
 	training_set.foe_attack_down = player2.attack_down
 	training_set.foe_jump = player2.jump
 	training_set.foe_projectile = player2.proj_attack
 	
-	if (players_distance == "close") then
-		training_set.dist_close = 1
-	elseif(players_distance == "medium") then
-		training_set.dist_medium = 1
-	else
-		training_set.dist_far = 1
-	end
 	
 	jp = ai_moves.l
 	if(player1.lado == "r") then

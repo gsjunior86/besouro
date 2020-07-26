@@ -31,6 +31,7 @@ lua/cfg/*
 .settings/
 target/
 .classpath
+.cache-main
 
 # Executables
 *.exe
