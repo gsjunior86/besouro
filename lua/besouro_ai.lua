@@ -202,8 +202,10 @@ function compute_players_info()
 		if(tonumber(player1.pos_x) < tonumber(player2.pos_x)) then
 			--emu.message("lado esquerdo")
 			player1.lado = "l"
+			player2.lado = "r"
 		else
 			player1.lado = "r"
+			player2.lado = "l"
 			--emu.message("lado direito")
 		end
 end
@@ -325,12 +327,14 @@ end
 
 
 function draw_info()
+	p1_lado = player1.lado == 'l' and 'left' or 'right'
+	p2_lado = player2.lado == 'l' and 'left' or 'right'
 	if (player1.life ~= nil) then
 		--gui.box(0, 0, 30, 20, 000000,000000)
 		gui.text(0,0,"Life: " .. player1.life)
 		gui.text(0,10,"Special: " .. player1.special)
 		lado = player1.lado == 'l' and 'left' or 'right'
-		gui.text(0,20,"Side: " .. lado)
+		gui.text(0,20,"Side: " .. p1_lado)
 		gui.text(0,30,"Distance: " .. players_distance)
 		gui.text(0,40,"Round: " .. player1.round)
 		gui.text(0,50,"Victories: " .. player1.victory)
@@ -344,7 +348,7 @@ function draw_info()
 		gui.text(280,0,"Life: " .. player2.life)
 		gui.text(280,10,"Special: " .. player2.special)
 		lado = player2.lado == 'l' and 'left' or 'right'
-		gui.text(280,20,"Side: " .. lado)
+		gui.text(280,20,"Side: " .. p2_lado)
 		gui.text(280,30,"Distance: " .. players_distance)
 		gui.text(280,40,"Round: " .. player2.round)
 		gui.text(280,50,"Victories: " .. player2.victory)
