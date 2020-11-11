@@ -32,6 +32,9 @@ ai_moves = {
     "P1 Right",
 	"P1 Up",
 	"P1 Down",
+	"P1 Up,P1 Right",
+	"P1 Up,P1 Left",
+	"P1 Down,P1 Left",
 	"P1 Button 1",
 	"P1 Button 2",
 	"P1 Button 3",
@@ -44,6 +47,9 @@ ai_moves = {
     "P1 Left",
 	"P1 Up",
 	"P1 Down",
+	"P1 Up,P1 Left",
+	"P1 Up,P1 Right",
+	"P1 Down,P1 Right",
 	"P1 Button 1",
 	"P1 Button 2",
 	"P1 Button 3",
@@ -69,6 +75,7 @@ player2.victory = 0
 local round = 1
 local computed = false
 local players_distance = 0
+local last_frame = emu.framecount()
 
 globals.draw_axis = true
 globals.draw_pushboxes = false
@@ -77,13 +84,35 @@ globals.draw_pushboxes = false
 
 network = NeuralNetwork.create(6,12,1,12,0.3)
 
+local g = nil
+
+local function any_true(condition)
+	for n = 1, #condition do
+		if condition[n] == true then return true end
+	end
+end
+
+local game_sets = {
+	{
+		games = {"sfa"},
+		round_start = function() return any_true({
+			memory.readdword(0xFF8004) == 0x40000 and memory.readdword(0xFF8008) == 0x40000,
+			memory.readword(0xFF8008) == 0x2 and memory.readword(0xFF800A) > 0
+		}) end
+	}
+}
+
 
 function send_data(set)
+	--print(g.round_start())
 	if(client == nil) then
 		client = socket.connect(host, port)
 		print("Trying to connect to Besouro Server...")
+		return 0
 	else
 		client:send(format_training_set(set) .. "\n")
+		local line, err = client:receive()
+		return line
 	end
 	
 	
@@ -269,19 +298,19 @@ function execute_move()
 		   --print(i)
 		   a[i] = true
 		end
-		
 		joypad.set(a)
 		move_queue = delete_first(move_queue)
 end
 
 function format_training_set(set)
 	label = get_pressed_keys(joypad.getdown())	
-	set_str = tonumber(set.dist) .. "," .. player1.life .. "," .. player1.special .. ",".. player2.life .. "," .. player2.special .. "," .. set.player_jump .. ",".. set.foe_attack .. "," .. set.foe_attack_down .. "," .. set.foe_jump .. "," .. set.foe_projectile 
+	set_str = emu.framecount() .. "," .. set.op .. "," .. tonumber(set.dist) .. "," .. player1.life .. "," .. player1.special .. ",".. player2.life .. "," .. player2.special .. "," .. set.player_jump .. ",".. set.foe_attack .. "," .. set.foe_attack_down .. "," .. set.foe_jump .. "," .. set.foe_projectile 
 	--.. "|".. label
 	return set_str
 end
 
 function predict_move()
+	training_set.op = "b"
 	training_set.dist = players_distance
 	training_set.player_jump = player1.jump
 	training_set.foe_attack = player2.attack
@@ -295,22 +324,38 @@ function predict_move()
 		jp = ai_moves.r
 	end
 	
-	move = jp[math.random(#jp)]
+	resp = tonumber(send_data(training_set))
+
+	last_frame = emu.framecount()
+
+	--[[
+	but = {}
 	
-	--print(training_set)
-	
-	--send_data(training_set)
+	for i=1, #jp do
+
+		for command in string.gmatch(jp[i], '([^,]+)') do
+			if(i == resp) then
+				but[command] = true
+			end	
+
+		end
+
+
+	end
+
+	joypad.set(but)
+	]]
 	
 end
 
 
 function compute_round()
-	if(
-			(memory.readbyte(0xFFCB01) > 0 and bit.band(memory.readbyte(0xFFCB02), 0x08) > 0)
-		or((memory.readdword(0xFF8004) == 0x40000 and memory.readdword(0xFF8008) == 0x40000) or (memory.readword(0xFF8008) == 0x2 and memory.readword(0xFF800A) > 0))) then
+	if(g.round_start()) then
 		
+
+		if(last_frame < emu.framecount()) then
 			predict_move()
-		
+		end
 
 		
 		define_winner(player1,player2)
@@ -364,9 +409,7 @@ end
 
 gui.register(function()
 	gui.clearuncommitted()
-	if(
-			(memory.readbyte(0xFFCB01) > 0 and bit.band(memory.readbyte(0xFFCB02), 0x08) > 0)
-		or((memory.readdword(0xFF8004) == 0x40000 and memory.readdword(0xFF8008) == 0x40000) or (memory.readword(0xFF8008) == 0x2 and memory.readword(0xFF800A) > 0))) then
+	if(g.round_start()) then
 		draw_info()
 		render_hitboxes()
 	end
@@ -418,8 +461,38 @@ function get_pressed_keys(pressed_buttons)
 
 end
 
+function 
+	whichgame()
+	for _, module in ipairs(game_sets) do
+		for _, shortname in ipairs(module.games) do
+			if emu.romname() == shortname or emu.parentname() == shortname then
+				print("Game Detected:  " .. emu.gamename())
+				g = module
+				return
+			end
+		end
+	end
+	print("Could not detect game: " .. emu.gamename())
+end
+
+function send_after_frame()
+	if(g.round_start()) then 
+		training_set.op = "a"
+		training_set.dist = players_distance
+		training_set.player_jump = player1.jump
+		training_set.foe_attack = player2.attack
+		training_set.foe_attack_down = player2.attack_down
+		training_set.foe_jump = player2.jump
+		training_set.foe_projectile = player2.proj_attack
+
+		resp = tonumber(send_data(training_set))
+	end
+
+end
+
 emu.registerstart(function()
 	whatgame()
+	whichgame()
 end)
 
 emu.registerbefore(function()
@@ -429,15 +502,10 @@ emu.registerbefore(function()
 end)
 
 emu.registerafter(function()
-	send_data(training_set)
+	send_after_frame()
 	reset_attack_proj()	
 	update_OSD()
     update_hitboxes()
-	
-	
-	
-	
-		
 	--clearJoypad()	
 end)
 

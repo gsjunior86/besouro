@@ -53,7 +53,7 @@ player2_attack_down = 0
 player2_jump = 0
 proj_attack = 0
 
-local profile = {
+profile = {
 {	games = {"sfa"},
 	number = {players = 3, projectiles = 8},
 	address = {
