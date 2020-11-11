@@ -32,6 +32,7 @@ lua/cfg/*
 target/
 .classpath
 .cache-main
+lua/nvram
 
 # Executables
 *.exe
