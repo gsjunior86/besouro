@@ -9,8 +9,8 @@ require "math"
 socket = require('socket')
 local host, port = "localhost", 2222
 client = nil
-
-
+training = true
+state_slot = "1"
 
 
 Buttons = {
@@ -241,10 +241,8 @@ end
 
 
 function clearJoypad()
-	
         jp = {}
 		--jp["P1 Button 1"] = false
-	
 		for i=1, #Buttons do
 			jp[Buttons[i]] = false		
 		end
@@ -328,36 +326,25 @@ function predict_move()
 
 	last_frame = emu.framecount()
 
-	--[[
 	but = {}
-	
 	for i=1, #jp do
-
-		for command in string.gmatch(jp[i], '([^,]+)') do
-			if(i == resp) then
-				but[command] = true
-			end	
-
-		end
-
-
+        for command in string.gmatch(jp[i], '([^,]+)') do
+                if(i == resp) then
+                    print(command)
+                    but[command] = true
+                end
+        end
 	end
-
 	joypad.set(but)
-	]]
+
 	
 end
 
 
 function compute_round()
 	if(g.round_start()) then
-		
 
-		if(last_frame < emu.framecount()) then
-			predict_move()
-		end
-
-		
+		predict_move()
 		define_winner(player1,player2)
 		
 	end	
@@ -428,7 +415,6 @@ end
 
 function get_pressed_keys(pressed_buttons)
 
-		
 		keys = {}
 		
 		j = 1
@@ -493,20 +479,26 @@ end
 emu.registerstart(function()
 	whatgame()
 	whichgame()
+	obj = savestate.create(1)
+    savestate.load(obj)
 end)
 
 emu.registerbefore(function()
-	get_players_info()
-	compute_players_info()
-	compute_round()
+    if(emu.framecount() % 2 == 0) then
+        get_players_info()
+        compute_players_info()
+        compute_round()
+	end
 end)
 
 emu.registerafter(function()
-	send_after_frame()
-	reset_attack_proj()	
-	update_OSD()
-    update_hitboxes()
-	--clearJoypad()	
+    if(emu.framecount() % 2 == 0) then
+        send_after_frame()
+        reset_attack_proj()
+        update_OSD()
+        update_hitboxes()
+        clearJoypad()
+    end
 end)
 
 

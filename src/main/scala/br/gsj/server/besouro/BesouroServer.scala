@@ -33,10 +33,13 @@ class BesouroServer(port: Int) {
           line = in.readLine()
 
           create_state(line, environment)
+          //println(line)
 
           environment.compute_reward()
 
-          out.println(Training.sort_command() + 1)
+          val command = Training.sort_command() + 1
+          //println(command)
+          out.println(command)
           out.flush()
 
         }
